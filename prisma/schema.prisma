@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PEGAWAI
+}
+
+enum Gender {
+  LAKI_LAKI
+  PEREMPUAN
+}
+
+enum AbsenType {
+  MASUK
+  PULANG
+}
+
+model Department {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
+}
+
+model Position {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  nip          String?  @unique 
+  name         String
+  email        String   @unique
+  password     String   
+  role         Role     @default(PEGAWAI)
+  gender       Gender?
+  phone        String?
+  address      String?
+  photo        String? 
+  
+  departmentId Int?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  
+  positionId   Int?
+  position     Position?   @relation(fields: [positionId], references: [id])
+
+  attendances  Attendance[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Attendance {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        AbsenType 
+  photoUrl    String  
+  latitude    Float? 
+  longitude   Float?
+  
+  createdAt   DateTime  @default(now()) // Waktu absensi diambil otomatis dari server
+}
